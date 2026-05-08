@@ -1,0 +1,15 @@
+services:
+  microfish:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      MICROFISH_HOST: "0.0.0.0"
+      MICROFISH_PORT: "8000"
+      MICROFISH_MCP_PATH: "/mcp"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
