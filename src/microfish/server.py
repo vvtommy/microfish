@@ -1,3 +1,4 @@
+import argparse
 import contextlib
 
 import uvicorn
@@ -6,7 +7,7 @@ from starlette.applications import Starlette
 from starlette.responses import JSONResponse
 from starlette.routing import Mount, Route
 
-from microfish.auth import BearerTokenMiddleware
+from microfish.auth import BearerTokenMiddleware, local_mcp_authentication
 from microfish.settings import Settings, load_settings
 from microfish.tinyfish_client import TinyFishClient
 from microfish.tools import TinyFishToolExecutor, register_tools
@@ -47,11 +48,40 @@ def create_app(settings: Settings | None = None, client: TinyFishClient | None =
     )
 
 
-def main() -> None:
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(prog="microfish")
+    parser.add_argument("--transport", choices=("http", "stdio"), default=None)
+    return parser.parse_args()
+
+
+def settings_from_args() -> Settings:
     settings = load_settings()
+    args = parse_args()
+    if args.transport is None:
+        return settings
+    return settings.model_copy(update={"transport": args.transport})
+
+
+def run_http(settings: Settings) -> None:
     uvicorn.run(
         create_app(settings),
         host=settings.host,
         port=settings.port,
         log_level=settings.log_level,
     )
+
+
+def run_stdio(settings: Settings) -> None:
+    if not settings.polling_enabled:
+        raise RuntimeError("stdio transport requires TINYFISH_KEYS")
+    mcp = create_mcp(settings)
+    with local_mcp_authentication():
+        mcp.run(transport="stdio")
+
+
+def main() -> None:
+    settings = settings_from_args()
+    if settings.transport == "stdio":
+        run_stdio(settings)
+        return
+    run_http(settings)

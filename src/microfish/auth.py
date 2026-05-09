@@ -1,4 +1,6 @@
+import contextlib
 import hmac
+from collections.abc import Iterator
 from contextvars import ContextVar
 
 from starlette.middleware import Middleware
@@ -40,6 +42,17 @@ def require_api_key() -> str:
 def require_mcp_authentication() -> None:
     if not current_mcp_authenticated.get():
         raise AuthenticationError("Missing or invalid Authorization Bearer token")
+
+
+@contextlib.contextmanager
+def local_mcp_authentication() -> Iterator[None]:
+    tinyfish_context = current_tinyfish_api_key.set(None)
+    mcp_context = current_mcp_authenticated.set(True)
+    try:
+        yield
+    finally:
+        current_tinyfish_api_key.reset(tinyfish_context)
+        current_mcp_authenticated.reset(mcp_context)
 
 
 def mask_token(token: str | None) -> str:
