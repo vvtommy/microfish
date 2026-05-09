@@ -172,7 +172,7 @@ Agent 自动化 · 批量自动化 · 浏览器会话 · 运行生命周期
 ### 本地运行
 
 ```bash
-uvx microfish              # 直接运行，无需 clone
+uvx microfish@latest              # 直接运行，无需 clone（获取最新版）
 ```
 
 ### Docker
