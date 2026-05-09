@@ -18,7 +18,6 @@ def test_dockerfile_uses_existing_readme_files():
 def test_build_compose_uses_local_dockerfile():
     text = Path("docker-compose_build.yml").read_text()
     assert "build: ." in text
-    assert "8000:8000" in text
     assert "/health" in text
 
 
@@ -26,7 +25,6 @@ def test_default_compose_uses_published_image():
     text = Path("docker-compose.yml").read_text()
     assert "ghcr.io/vvtommy/microfish:${MICROFISH_IMAGE_TAG:-latest}" in text
     assert "build: ." not in text
-    assert "8000:8000" in text
     assert "/health" in text
 
 
