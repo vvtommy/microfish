@@ -2,128 +2,40 @@
 
 # microfish
 
-English documentation: [README.md](README.md)
+[English](README.md)
 
-microfish 是一个裁剪版 TinyFish MCP 网关，只暴露 allowlist 中的 TinyFish Search 和 Fetch 相关工具。
+[![PyPI](https://img.shields.io/pypi/v/microfish)](https://pypi.org/project/microfish/) [![Docker](https://img.shields.io/badge/ghcr.io-microfish-blue)](https://ghcr.io/vvtommy/microfish) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-## 工具列表
+> TinyFish 的纯免费 MCP 网关 — 仅暴露 Search 和 Fetch，别无其他。
+> 
 
-保留工具：
-- search
-- fetch_content
-- get_search_usage
-- list_fetch_usage
+## 为什么选 microfish？
 
-屏蔽工具组：
-- Agent 自动化
-- 批量自动化
-- 浏览器会话
+|  | 官方 MCP | microfish |
+| --- | --- | --- |
+| Search & Fetch（免费） | ✅ | ✅ |
+| Agent / Browser / Batch（付费） | ✅ 已暴露 | ❌ 已剥离 |
+| Agent 误触付费工具 | ⚠️ 可能 | 🚫 不可能 |
+| API Key 池 | ❌ | ✅ 内置 |
+| Rate limit | 单 key | 多 key 池化，更高吞吐 |
+- **🔒 仅免费接口** — 只注册 `search`、`fetch_content`、`get_search_usage`、`list_fetch_usage` 四个工具。付费 API 从未暴露，agent 看不到也调不到 — 不会产生意外费用，不会浪费 token。
+- **⚡ 内置 Key 池** — 配置多个 TinyFish API Key，microfish 自动轮转分配。单 key 失败自动 fallback 到下一个（最多 3 次重试），有效突破单 key 速率限制。
 
-## 认证与运行模式
+## 快速开始
 
-microfish 只暴露 TinyFish Search 与 Fetch 相关 API。TinyFish Agent、Browser、batch 和 run lifecycle API 都不会注册。
+> 免费获取 API Key → https://agent.tinyfish.ai/api-keys
+> 
 
-### 获取 TinyFish API Key
+### stdio（推荐）
 
-到 https://agent.tinyfish.ai/api-keys 生成你的 API key。
-
-### 客户端单 Key 模式
-
-不设置 `TINYFISH_KEYS`。每个 MCP 客户端发送 `Authorization: Bearer <YOUR_TINYFISH_API_KEY>`。microfish 只在当前请求中把它转成上游 `X-API-Key`。
-
-### 服务端单 Key 模式
-
-将 `TINYFISH_KEYS` 设置为一个 TinyFish API key。MCP 客户端不会拿到 TinyFish key。如果设置了 `MCP_AUTH_TOKEN`，客户端发送 `Authorization: Bearer <YOUR_MCP_AUTH_TOKEN>`；如果未设置 `MCP_AUTH_TOKEN`，MCP 入口不做 Bearer 校验。
-
-### 服务端多 Key 模式
-
-将 `TINYFISH_KEYS` 设置为多个逗号分隔的 TinyFish API key。microfish 按顺序分配请求。整体上游请求失败时尝试下一个 key，并在该次调用试完可用 key 或完成最多三次额外重试后停止。
-
-## 服务端配置
-
-microfish 通过环境变量读取运行时配置：
-
-- `MICROFISH_HOST`：HTTP 服务绑定主机，默认 `0.0.0.0`。
-- `MICROFISH_PORT`：HTTP 服务绑定端口，默认 `8000`。
-- `MICROFISH_MCP_PATH`：MCP 入口的 HTTP 路径，默认 `/mcp`。
-- `MICROFISH_TRANSPORT`：服务传输模式。http 用于 HTTP 服务，stdio 用于 coding agent 本地子进程。默认 stdio。
-- `TINYFISH_KEYS`：逗号分隔的 TinyFish API key；设置后进入服务端托管模式。
-- `MCP_AUTH_TOKEN`：服务端托管模式下可选的 MCP 客户端 bearer token。
-
-## 客户端配置
-
-microfish 支持两种传输方式：
-- **stdio 传输(默认)**（`MICROFISH_TRANSPORT=stdio` 或 `--transport stdio`）：以 `uvx microfish --transport stdio` 作为 coding agent 的本地子进程启动。
-- **HTTP 传输**（`MICROFISH_TRANSPORT=http`）：以 HTTP 服务运行 microfish，客户端连接 `http://localhost:8000/mcp`。
-
-HTTP 传输下 `Authorization: Bearer` 的取值依赖运行模式：
-- **客户端单 Key 模式**：填写你的 TinyFish API key。
-- **服务端单 Key 或多 Key 模式且设置了 `MCP_AUTH_TOKEN`**：填写 MCP auth token。
-- **服务端托管 key 但未设置 `MCP_AUTH_TOKEN`**：省略 Authorization 头。
-
-stdio 传输需要设置 `TINYFISH_KEYS`，因为本地子进程管道没有独立的 Authorization 头。
-
-### Claude Code
-
-HTTP 传输：
+**Claude Code:**
 
 ```bash
-# 不带认证头
-claude mcp add --transport http microfish http://localhost:8000/mcp
-
-# 带认证头
-claude mcp add --transport http microfish http://localhost:8000/mcp \
-  --header "Authorization: Bearer <YOUR_MCP_OR_TINYFISH_TOKEN>"
-```
-
-stdio 传输：
-
-```bash
-TINYFISH_KEYS=<YOUR_TINYFISH_API_KEY> \
+TINYFISH_KEYS=<KEY> \
   claude mcp add microfish --env TINYFISH_KEYS -- uvx microfish
 ```
 
-### Codex
-
-HTTP 传输：
-
-```toml
-[mcp_servers.microfish]
-url = "http://localhost:8000/mcp"
-bearer_token_env_var = "MICROFISH_MCP_BEARER"
-```
-
-在 shell 环境中将 `MICROFISH_MCP_BEARER` 设置为你的 TinyFish API key（客户端单 Key 模式）或 MCP auth token（服务端托管模式）。
-
-stdio 传输：
-
-```toml
-[mcp_servers.microfish]
-command = "uvx"
-args = ["microfish"]
-env = { TINYFISH_KEYS = "<YOUR_TINYFISH_API_KEY>" }
-```
-
-### Cursor
-
-HTTP 传输：
-
-```json
-{
-  "mcpServers": {
-    "microfish": {
-      "url": "http://localhost:8000/mcp",
-      "headers": {
-        "Authorization": "Bearer ${env:MICROFISH_MCP_BEARER}"
-      }
-    }
-  }
-}
-```
-
-在环境变量中将 `MICROFISH_MCP_BEARER` 设置为你的 TinyFish API key（客户端单 Key 模式）或 MCP auth token（服务端托管模式）。如不需要认证，可移除 `headers` 块。
-
-stdio 传输：
+**Cursor / 其他 MCP 客户端:**
 
 ```json
 {
@@ -131,41 +43,162 @@ stdio 传输：
     "microfish": {
       "command": "uvx",
       "args": ["microfish"],
-      "env": {
-        "TINYFISH_KEYS": "<YOUR_TINYFISH_API_KEY>"
-      }
+      "env": { "TINYFISH_KEYS": "<KEY>" }
     }
   }
 }
 ```
 
-## 本地运行
-
-    uv sync
-    uv run microfish
-
-或者无需克隆仓库，直接使用 `uvx microfish`。
-
-## Docker
-
-仓库提供两份 compose 文件：
-- `docker-compose.yml` 拉取 GHCR 上发布的镜像 `ghcr.io/vvtommy/microfish:${MICROFISH_IMAGE_TAG:-latest}`。
-- `docker-compose_build.yml` 使用本地 Dockerfile 构建镜像。
-
-两份文件都将 microfish 暴露在 8000 端口。不要直接将 TinyFish key 写入 compose 文件，请通过部署环境的环境变量传递。
+### HTTP
 
 ```bash
-docker compose up -d
-claude mcp add --transport http microfish http://localhost:8000/mcp \
-  --header "Authorization: Bearer <YOUR_MCP_OR_TINYFISH_TOKEN>"
+MICROFISH_TRANSPORT=http TINYFISH_KEYS=<KEY> uvx microfish
+# 端点: http://localhost:8000/mcp
 ```
+
+## 工具
+
+### ✅ 可用
+
+| 工具 | 说明 |
+| --- | --- |
+| `search` | 网页搜索（免费） |
+| `fetch_content` | 拓取并提取网页内容（免费） |
+| `get_search_usage` | 搜索用量统计 |
+| `list_fetch_usage` | 拓取用量统计 |
+
+### 🚫 已屏蔽
+
+Agent 自动化 · 批量自动化 · 浏览器会话 · 运行生命周期
+
+## 认证
+
+**1. 客户端自带 key** — 不设置 `TINYFISH_KEYS`，客户端通过 `Authorization: Bearer` 传递自己的 key。
+
+**2. 服务端单 key** — 设置 `TINYFISH_KEYS=<key>`，可选 `MCP_AUTH_TOKEN` 保护端点。
+
+**3. 服务端 key 池** ⚡ — 设置 `TINYFISH_KEYS=k1,k2,k3`，按序轮转，失败自动切换（最多 3 次重试）。
+
+## 配置
+
+| 变量 | 默认值 | 说明 |
+| --- | --- | --- |
+| `TINYFISH_KEYS` | — | 逗号分隔的 API keys，启用服务端管理模式 |
+| `MCP_AUTH_TOKEN` | — | 客户端访问令牌（服务端管理模式） |
+| `MICROFISH_TRANSPORT` | `stdio` | `stdio` 或 `http` |
+| `MICROFISH_HOST` | `0.0.0.0` | 绑定地址（HTTP 模式） |
+| `MICROFISH_PORT` | `8000` | 绑定端口（HTTP 模式） |
+| `MICROFISH_MCP_PATH` | `/mcp` | MCP 端点路径（HTTP 模式） |
+
+## 客户端配置示例
+
+- Claude Code
+    
+    **HTTP:**
+    
+    ```bash
+    # 无认证
+    claude mcp add --transport http microfish http://localhost:8000/mcp
+    
+    # 有认证
+    claude mcp add --transport http microfish http://localhost:8000/mcp \
+      --header "Authorization: Bearer <YOUR_MCP_OR_TINYFISH_TOKEN>"
+    ```
+    
+    **stdio:**
+    
+    ```bash
+    TINYFISH_KEYS=<KEY> \
+      claude mcp add microfish --env TINYFISH_KEYS -- uvx microfish
+    ```
+    
+- Codex
+    
+    **HTTP:**
+    
+    ```toml
+    [mcp_servers.microfish]
+    url = "http://localhost:8000/mcp"
+    bearer_token_env_var = "MICROFISH_MCP_BEARER"
+    ```
+    
+    将 `MICROFISH_MCP_BEARER` 设置为 TinyFish API key（客户端自带模式）或 MCP auth token（服务端管理模式）。
+    
+    **stdio:**
+    
+    ```toml
+    [mcp_servers.microfish]
+    command = "uvx"
+    args = ["microfish"]
+    env = { TINYFISH_KEYS = "<KEY>" }
+    ```
+    
+- Cursor
+    
+    **HTTP:**
+    
+    ```json
+    {
+      "mcpServers": {
+        "microfish": {
+          "url": "http://localhost:8000/mcp",
+          "headers": {
+            "Authorization": "Bearer ${env:MICROFISH_MCP_BEARER}"
+          }
+        }
+      }
+    }
+    ```
+    
+    无需认证时删除 `headers` 块。
+    
+    **stdio:**
+    
+    ```json
+    {
+      "mcpServers": {
+        "microfish": {
+          "command": "uvx",
+          "args": ["microfish"],
+          "env": { "TINYFISH_KEYS": "<KEY>" }
+        }
+      }
+    }
+    ```
+    
+
+## 部署
+
+### 本地运行
+
+```bash
+uvx microfish              # 直接运行，无需 clone
+```
+
+### Docker
+
+```bash
+docker compose up -d       # 拉取 ghcr.io/vvtommy/microfish:latest
+```
+
+- `docker-compose.yml` — 拉取发布镜像
+- `docker-compose_build.yml` — 本地构建
+
+<aside>
+⚠️
+
+不要在 compose 文件中写入 API key，请使用环境变量。
+
+</aside>
+
+## 参与贡献
+
+欢迎提交 PR 和 Issue。重大改动请先开 issue 讨论。
 
 ## 发布
 
-推送形如 `vX.Y.Z` 的 SemVer tag 会触发以下 workflow：
-- `.github/workflows/pypi.yml`：构建并通过 PyPI OIDC trusted publishing 发布 Python 包到 PyPI。
-- `.github/workflows/docker.yml`：构建并发布 `ghcr.io/vvtommy/microfish` Docker 镜像，包含版本 tag 和 `latest`。
+推送 `vX.Y.Z` tag 触发：PyPI 发布 + GHCR 镜像发布。
 
-## MCP 端点
+## 许可证
 
-    http://localhost:8000/mcp
+MIT
