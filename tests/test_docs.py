@@ -14,10 +14,19 @@ REQUIRED_SHARED_TERMS = {
     "MICROFISH_HOST",
     "MICROFISH_PORT",
     "MICROFISH_MCP_PATH",
+    "MICROFISH_TRANSPORT",
+    "uvx microfish",
+    "stdio",
     "Claude Code",
     "Codex",
     "Cursor",
     "http://localhost:8000/mcp",
+    "docker-compose.yml",
+    "docker-compose_build.yml",
+    "ghcr.io/vvtommy/microfish",
+    "pypi.yml",
+    "PyPI OIDC",
+    "vX.Y.Z",
 }
 
 
