@@ -46,7 +46,7 @@ microfish reads runtime settings from environment variables:
 - `MICROFISH_HOST`: bind host for the HTTP server. Defaults to `0.0.0.0`.
 - `MICROFISH_PORT`: bind port for the HTTP server. Defaults to `8000`.
 - `MICROFISH_MCP_PATH`: HTTP path that exposes the MCP entrypoint. Defaults to `/mcp`.
-- `MICROFISH_TRANSPORT`: transport for the server. Use http for the HTTP service or stdio for local coding agent subprocesses. Defaults to http.
+- `MICROFISH_TRANSPORT`: transport for the server. Use http for the HTTP service or stdio for local coding agent subprocesses. Defaults to stdio.
 - `TINYFISH_KEYS`: comma-separated TinyFish API keys; presence selects server-managed mode.
 - `MCP_AUTH_TOKEN`: optional bearer token required from MCP clients in server-managed mode.
 
@@ -54,7 +54,7 @@ microfish reads runtime settings from environment variables:
 
 microfish supports two transports:
 - **stdio transport(default)** (`MICROFISH_TRANSPORT=stdio` or `--transport stdio`): launch `uvx microfish --transport stdio` as a local subprocess for coding agents.
-- **HTTP transport** (`MICROFISH_TRANSPORT=http`, the default): run microfish as an HTTP service and connect clients to `http://localhost:8000/mcp`.
+- **HTTP transport** (`MICROFISH_TRANSPORT=http`): run microfish as an HTTP service and connect clients to `http://localhost:8000/mcp`.
 
 For the HTTP transport, the value of `Authorization: Bearer` depends on your running mode:
 - **Client-owned single key**: set it to your TinyFish API key.

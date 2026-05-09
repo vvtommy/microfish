@@ -26,9 +26,9 @@ def test_create_app_without_real_port():
     assert app is not None
 
 
-def test_default_transport_is_http():
+def test_default_transport_is_stdio():
     settings = Settings()
-    assert settings.transport == "http"
+    assert settings.transport == "stdio"
 
 
 def test_transport_env_override(monkeypatch):

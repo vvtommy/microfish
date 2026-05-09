@@ -53,7 +53,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--transport",
         choices=("http", "stdio"),
-        default="stdio",
+        default=None,
         help="Transport method to run the server",
     )
     return parser.parse_args()
@@ -62,6 +62,8 @@ def parse_args() -> argparse.Namespace:
 def settings_from_args() -> Settings:
     settings = load_settings()
     args = parse_args()
+    if args.transport is None:
+        return settings
     return settings.model_copy(update={"transport": args.transport})
 
 

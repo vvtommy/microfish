@@ -12,7 +12,7 @@ class Settings(BaseSettings):
     host: str = "0.0.0.0"
     port: int = 8000
     mcp_path: str = "/mcp"
-    transport: TransportMode = "http"
+    transport: TransportMode = "stdio"
     tinyfish_search_url: str = "https://api.search.tinyfish.ai"
     tinyfish_fetch_url: str = "https://api.fetch.tinyfish.ai"
     request_timeout_seconds: float = Field(default=30.0, gt=0)

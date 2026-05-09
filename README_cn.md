@@ -46,7 +46,7 @@ microfish 通过环境变量读取运行时配置：
 - `MICROFISH_HOST`：HTTP 服务绑定主机，默认 `0.0.0.0`。
 - `MICROFISH_PORT`：HTTP 服务绑定端口，默认 `8000`。
 - `MICROFISH_MCP_PATH`：MCP 入口的 HTTP 路径，默认 `/mcp`。
-- `MICROFISH_TRANSPORT`：服务传输模式。http 用于 HTTP 服务，stdio 用于 coding agent 本地子进程。默认 http。
+- `MICROFISH_TRANSPORT`：服务传输模式。http 用于 HTTP 服务，stdio 用于 coding agent 本地子进程。默认 stdio。
 - `TINYFISH_KEYS`：逗号分隔的 TinyFish API key；设置后进入服务端托管模式。
 - `MCP_AUTH_TOKEN`：服务端托管模式下可选的 MCP 客户端 bearer token。
 
@@ -54,7 +54,7 @@ microfish 通过环境变量读取运行时配置：
 
 microfish 支持两种传输方式：
 - **stdio 传输(默认)**（`MICROFISH_TRANSPORT=stdio` 或 `--transport stdio`）：以 `uvx microfish --transport stdio` 作为 coding agent 的本地子进程启动。
-- **HTTP 传输**（`MICROFISH_TRANSPORT=http`，默认）：以 HTTP 服务运行 microfish，客户端连接 `http://localhost:8000/mcp`。
+- **HTTP 传输**（`MICROFISH_TRANSPORT=http`）：以 HTTP 服务运行 microfish，客户端连接 `http://localhost:8000/mcp`。
 
 HTTP 传输下 `Authorization: Bearer` 的取值依赖运行模式：
 - **客户端单 Key 模式**：填写你的 TinyFish API key。
