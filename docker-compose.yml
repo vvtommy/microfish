@@ -2,7 +2,7 @@ services:
   microfish:
     image: ghcr.io/vvtommy/microfish:${MICROFISH_IMAGE_TAG:-latest}
     ports:
-      - "8000:8000"
+      - 8000
     environment:
       MICROFISH_HOST: "0.0.0.0"
       MICROFISH_PORT: "8000"
