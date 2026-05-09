@@ -1,6 +1,6 @@
 services:
   microfish:
-    image: ghcr.io/vvtommy/microfish:${MICROFISH_IMAGE_TAG:-latest}
+    build: .
     ports:
       - "8000:8000"
     environment:
