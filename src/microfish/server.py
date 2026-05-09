@@ -7,6 +7,8 @@ from starlette.applications import Starlette
 from starlette.responses import JSONResponse
 from starlette.routing import Mount, Route
 
+from mcp.server.transport_security import TransportSecuritySettings
+
 from microfish.auth import BearerTokenMiddleware, local_mcp_authentication
 from microfish.settings import Settings, load_settings
 from microfish.tinyfish_client import TinyFishClient
@@ -23,6 +25,9 @@ def create_mcp(settings: Settings, client: TinyFishClient | None = None) -> Fast
         stateless_http=True,
         json_response=True,
         streamable_http_path=settings.mcp_path,
+        transport_security=TransportSecuritySettings(
+            enable_dns_rebinding_protection=False,
+        ),
     )
     resolved_client = client or TinyFishClient.from_settings(settings)
     register_tools(mcp, TinyFishToolExecutor(settings, resolved_client))
