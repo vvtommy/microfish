@@ -26,6 +26,12 @@ jobs:
             exit 1
           fi
 
+      - name: Set version from tag
+        run: |
+          TAG_VERSION="${GITHUB_REF_NAME#v}"
+          sed -i "s/^version = \".*\"/version = \"${TAG_VERSION}\"/" pyproject.toml
+          echo "Set version to ${TAG_VERSION}"
+
       - name: Install dependencies
         run: uv sync --frozen
 
