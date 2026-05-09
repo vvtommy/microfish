@@ -172,7 +172,7 @@ Agent automation · Batch automation · Browser sessions · Run lifecycle
 ### Local
 
 ```bash
-uvx microfish              # run directly, no clone needed
+uvx microfish@latest              # run directly, no clone needed (fetches latest)
 ```
 
 ### Docker
