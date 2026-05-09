@@ -2,10 +2,12 @@
 
 # 🐟 microfish
 
+[中文](README_cn.md)
+
 [![PyPI](https://img.shields.io/pypi/v/microfish)](https://pypi.org/project/microfish/) [![Docker](https://img.shields.io/badge/ghcr.io-microfish-blue)](https://ghcr.io/vvtommy/microfish) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 > Free-only MCP gateway for TinyFish — exposes just Search & Fetch, nothing else.
-> 
+
 
 ## Why microfish?
 

@@ -2,6 +2,8 @@
 
 # microfish
 
+[English](README.md)
+
 [![PyPI](https://img.shields.io/pypi/v/microfish)](https://pypi.org/project/microfish/) [![Docker](https://img.shields.io/badge/ghcr.io-microfish-blue)](https://ghcr.io/vvtommy/microfish) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 > TinyFish 的纯免费 MCP 网关 — 仅暴露 Search 和 Fetch，别无其他。
