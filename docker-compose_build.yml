@@ -1,14 +1,13 @@
 services:
   microfish:
-    image: ghcr.io/vvtommy/microfish:${MICROFISH_IMAGE_TAG:-latest}
+    build: .
     ports:
-      - 8000
+      - "8000:8000"
     environment:
       MICROFISH_HOST: "0.0.0.0"
       MICROFISH_PORT: "8000"
       MICROFISH_MCP_PATH: "/mcp"
-      MICROFISH_TRANSPORT: "http"
-      TINYFISH_KEYS: ${TINYFISH_KEYS:-}
+      MICOFISH_TRANSPORT: "http"
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health')"]
       interval: 30s

@@ -26,9 +26,9 @@ def test_create_app_without_real_port():
     assert app is not None
 
 
-def test_default_transport_is_http():
+def test_default_transport_is_stdio():
     settings = Settings()
-    assert settings.transport == "http"
+    assert settings.transport == "stdio"
 
 
 def test_transport_env_override(monkeypatch):
@@ -37,9 +37,9 @@ def test_transport_env_override(monkeypatch):
     assert settings.transport == "stdio"
 
 
-def test_main_uses_http_by_default(monkeypatch):
+def test_main_uses_http_when_flag_given(monkeypatch):
     calls = []
-    monkeypatch.setattr("sys.argv", ["microfish"])
+    monkeypatch.setattr("sys.argv", ["microfish", "--transport", "http"])
     monkeypatch.setattr(
         "microfish.server.uvicorn.run",
         lambda *args, **kwargs: calls.append(kwargs),

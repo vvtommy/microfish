@@ -13,7 +13,7 @@ RUN uv sync --frozen --no-dev --no-install-project
 
 
 COPY src ./src
-COPY Readmd.md Readmd_cn.md ./
+COPY README.md README_cn.md ./
 RUN uv sync --frozen --no-dev
 
 EXPOSE 8000

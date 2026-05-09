@@ -46,19 +46,26 @@ microfish 通过环境变量读取运行时配置：
 - `MICROFISH_HOST`：HTTP 服务绑定主机，默认 `0.0.0.0`。
 - `MICROFISH_PORT`：HTTP 服务绑定端口，默认 `8000`。
 - `MICROFISH_MCP_PATH`：MCP 入口的 HTTP 路径，默认 `/mcp`。
+- `MICROFISH_TRANSPORT`：服务传输模式。http 用于 HTTP 服务，stdio 用于 coding agent 本地子进程。默认 stdio。
 - `TINYFISH_KEYS`：逗号分隔的 TinyFish API key；设置后进入服务端托管模式。
 - `MCP_AUTH_TOKEN`：服务端托管模式下可选的 MCP 客户端 bearer token。
 
 ## 客户端配置
 
-以下示例均使用 `http://localhost:8000/mcp` 作为默认地址，远程部署时请替换为你的 HTTPS 地址。
+microfish 支持两种传输方式：
+- **stdio 传输(默认)**（`MICROFISH_TRANSPORT=stdio` 或 `--transport stdio`）：以 `uvx microfish --transport stdio` 作为 coding agent 的本地子进程启动。
+- **HTTP 传输**（`MICROFISH_TRANSPORT=http`）：以 HTTP 服务运行 microfish，客户端连接 `http://localhost:8000/mcp`。
 
-`Authorization: Bearer` 的值取决于运行模式：
+HTTP 传输下 `Authorization: Bearer` 的取值依赖运行模式：
 - **客户端单 Key 模式**：填写你的 TinyFish API key。
 - **服务端单 Key 或多 Key 模式且设置了 `MCP_AUTH_TOKEN`**：填写 MCP auth token。
 - **服务端托管 key 但未设置 `MCP_AUTH_TOKEN`**：省略 Authorization 头。
 
+stdio 传输需要设置 `TINYFISH_KEYS`，因为本地子进程管道没有独立的 Authorization 头。
+
 ### Claude Code
+
+HTTP 传输：
 
 ```bash
 # 不带认证头
@@ -69,7 +76,16 @@ claude mcp add --transport http microfish http://localhost:8000/mcp \
   --header "Authorization: Bearer <YOUR_MCP_OR_TINYFISH_TOKEN>"
 ```
 
+stdio 传输：
+
+```bash
+TINYFISH_KEYS=<YOUR_TINYFISH_API_KEY> \
+  claude mcp add microfish --env TINYFISH_KEYS -- uvx microfish
+```
+
 ### Codex
+
+HTTP 传输：
 
 ```toml
 [mcp_servers.microfish]
@@ -79,7 +95,18 @@ bearer_token_env_var = "MICROFISH_MCP_BEARER"
 
 在 shell 环境中将 `MICROFISH_MCP_BEARER` 设置为你的 TinyFish API key（客户端单 Key 模式）或 MCP auth token（服务端托管模式）。
 
+stdio 传输：
+
+```toml
+[mcp_servers.microfish]
+command = "uvx"
+args = ["microfish"]
+env = { TINYFISH_KEYS = "<YOUR_TINYFISH_API_KEY>" }
+```
+
 ### Cursor
+
+HTTP 传输：
 
 ```json
 {
@@ -96,20 +123,48 @@ bearer_token_env_var = "MICROFISH_MCP_BEARER"
 
 在环境变量中将 `MICROFISH_MCP_BEARER` 设置为你的 TinyFish API key（客户端单 Key 模式）或 MCP auth token（服务端托管模式）。如不需要认证，可移除 `headers` 块。
 
+stdio 传输：
+
+```json
+{
+  "mcpServers": {
+    "microfish": {
+      "command": "uvx",
+      "args": ["microfish"],
+      "env": {
+        "TINYFISH_KEYS": "<YOUR_TINYFISH_API_KEY>"
+      }
+    }
+  }
+}
+```
+
 ## 本地运行
 
     uv sync
     uv run microfish
 
+或者无需克隆仓库，直接使用 `uvx microfish`。
+
 ## Docker
 
-`docker-compose.yml` 构建本地 Dockerfile 并将 microfish 暴露在 8000 端口。
+仓库提供两份 compose 文件：
+- `docker-compose.yml` 拉取 GHCR 上发布的镜像 `ghcr.io/vvtommy/microfish:${MICROFISH_IMAGE_TAG:-latest}`。
+- `docker-compose_build.yml` 使用本地 Dockerfile 构建镜像。
 
-仓库发布 workflow 发布镜像后，可以通过 `ghcr.io/vvtommy/microfish:<VERSION>` 使用已发布镜像。不要直接将 TinyFish key 写入 compose 文件，请通过部署环境的环境变量传递。
+两份文件都将 microfish 暴露在 8000 端口。不要直接将 TinyFish key 写入 compose 文件，请通过部署环境的环境变量传递。
 
-## Docker 镜像发布
+```bash
+docker compose up -d
+claude mcp add --transport http microfish http://localhost:8000/mcp \
+  --header "Authorization: Bearer <YOUR_MCP_OR_TINYFISH_TOKEN>"
+```
 
-推送 `vX.Y.Z` 形式的 tag 后，GitHub Actions 会发布 `ghcr.io/vvtommy/microfish` 的版本 tag 和 `latest`。
+## 发布
+
+推送形如 `vX.Y.Z` 的 SemVer tag 会触发以下 workflow：
+- `.github/workflows/pypi.yml`：构建并通过 PyPI OIDC trusted publishing 发布 Python 包到 PyPI。
+- `.github/workflows/docker.yml`：构建并发布 `ghcr.io/vvtommy/microfish` Docker 镜像，包含版本 tag 和 `latest`。
 
 ## MCP 端点
 
