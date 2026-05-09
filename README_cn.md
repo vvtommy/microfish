@@ -53,8 +53,8 @@ microfish 通过环境变量读取运行时配置：
 ## 客户端配置
 
 microfish 支持两种传输方式：
+- **stdio 传输(默认)**（`MICROFISH_TRANSPORT=stdio` 或 `--transport stdio`）：以 `uvx microfish --transport stdio` 作为 coding agent 的本地子进程启动。
 - **HTTP 传输**（`MICROFISH_TRANSPORT=http`，默认）：以 HTTP 服务运行 microfish，客户端连接 `http://localhost:8000/mcp`。
-- **stdio 传输**（`MICROFISH_TRANSPORT=stdio` 或 `--transport stdio`）：以 `uvx microfish --transport stdio` 作为 coding agent 的本地子进程启动。
 
 HTTP 传输下 `Authorization: Bearer` 的取值依赖运行模式：
 - **客户端单 Key 模式**：填写你的 TinyFish API key。
@@ -80,7 +80,7 @@ stdio 传输：
 
 ```bash
 TINYFISH_KEYS=<YOUR_TINYFISH_API_KEY> \
-  claude mcp add microfish --env TINYFISH_KEYS -- uvx microfish --transport stdio
+  claude mcp add microfish --env TINYFISH_KEYS -- uvx microfish
 ```
 
 ### Codex
@@ -100,7 +100,7 @@ stdio 传输：
 ```toml
 [mcp_servers.microfish]
 command = "uvx"
-args = ["microfish", "--transport", "stdio"]
+args = ["microfish"]
 env = { TINYFISH_KEYS = "<YOUR_TINYFISH_API_KEY>" }
 ```
 
@@ -130,7 +130,7 @@ stdio 传输：
   "mcpServers": {
     "microfish": {
       "command": "uvx",
-      "args": ["microfish", "--transport", "stdio"],
+      "args": ["microfish"],
       "env": {
         "TINYFISH_KEYS": "<YOUR_TINYFISH_API_KEY>"
       }

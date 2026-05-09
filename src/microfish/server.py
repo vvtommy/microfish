@@ -50,15 +50,18 @@ def create_app(settings: Settings | None = None, client: TinyFishClient | None =
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(prog="microfish")
-    parser.add_argument("--transport", choices=("http", "stdio"), default=None)
+    parser.add_argument(
+        "--transport",
+        choices=("http", "stdio"),
+        default="stdio",
+        help="Transport method to run the server",
+    )
     return parser.parse_args()
 
 
 def settings_from_args() -> Settings:
     settings = load_settings()
     args = parse_args()
-    if args.transport is None:
-        return settings
     return settings.model_copy(update={"transport": args.transport})
 
 

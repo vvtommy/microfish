@@ -53,8 +53,8 @@ microfish reads runtime settings from environment variables:
 ## Client configuration
 
 microfish supports two transports:
+- **stdio transport(default)** (`MICROFISH_TRANSPORT=stdio` or `--transport stdio`): launch `uvx microfish --transport stdio` as a local subprocess for coding agents.
 - **HTTP transport** (`MICROFISH_TRANSPORT=http`, the default): run microfish as an HTTP service and connect clients to `http://localhost:8000/mcp`.
-- **stdio transport** (`MICROFISH_TRANSPORT=stdio` or `--transport stdio`): launch `uvx microfish --transport stdio` as a local subprocess for coding agents.
 
 For the HTTP transport, the value of `Authorization: Bearer` depends on your running mode:
 - **Client-owned single key**: set it to your TinyFish API key.
@@ -80,7 +80,7 @@ stdio transport:
 
 ```bash
 TINYFISH_KEYS=<YOUR_TINYFISH_API_KEY> \
-  claude mcp add microfish --env TINYFISH_KEYS -- uvx microfish --transport stdio
+  claude mcp add microfish --env TINYFISH_KEYS -- uvx microfish
 ```
 
 ### Codex
@@ -100,7 +100,7 @@ stdio transport:
 ```toml
 [mcp_servers.microfish]
 command = "uvx"
-args = ["microfish", "--transport", "stdio"]
+args = ["microfish"]
 env = { TINYFISH_KEYS = "<YOUR_TINYFISH_API_KEY>" }
 ```
 
@@ -130,7 +130,7 @@ stdio transport:
   "mcpServers": {
     "microfish": {
       "command": "uvx",
-      "args": ["microfish", "--transport", "stdio"],
+      "args": ["microfish"],
       "env": {
         "TINYFISH_KEYS": "<YOUR_TINYFISH_API_KEY>"
       }

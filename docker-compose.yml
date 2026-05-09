@@ -7,6 +7,7 @@ services:
       MICROFISH_HOST: "0.0.0.0"
       MICROFISH_PORT: "8000"
       MICROFISH_MCP_PATH: "/mcp"
+      MICOFISH_TRANSPORT: "http"
       TINYFISH_KEYS: ${TINYFISH_KEYS:-}
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health')"]
